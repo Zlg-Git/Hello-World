@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Insert title here</title>
+    <link rel="stylesheet" href="../static/layui/css/layui.css" />
+</head>
+<body>
+<div class="layui-container">
+    <!-- 写搜索内容 -->
+    <div>
+        <div class="layui-form layui-form-pane" >
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        名称
+                    </label>
+                    <div class="layui-input-inline">
+                        <input  class="layui-input" placeholder="客户名称" id="custName"  name="custName"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        职位
+                    </label>
+                    <div class="layui-input-inline">
+                        <input  class="layui-input" placeholder="客户职位"  id="custPosition" />
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        所属公司
+                    </label>
+                    <div class="layui-input-inline">
+                        <input  class="layui-input" placeholder="所属公司"  id="custCompany" />
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn" id="searchBtn">搜索</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- 显示数据的table -->
+    <div>
+        <table id="dataTable"  lay-filter="dataTableFilter"></table>
+    </div>
+</div>
+<!-- 工具栏模板 -->
+<!-- 头工具栏 -->
+<script type="text/html" id="headerBtns">
+    <button class="layui-btn layui-btn-sm" lay-event="add">新增</button>
+    <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>
+    <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="del">删除</button>
+</script>
+<!-- 新增用户信息模板 -->
+<script type="text/html" id="editForm" style="display:none">
+    <div style="padding-left:100px;padding-top:20px">
+        <form class="layui-form layui-form-pane" id="addForm">
+            <input  type="hidden" name="service" value="add" />
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        客户名称
+                    </label>
+                    <div class="layui-input-inline">
+                        <input  class="layui-input" placeholder="客户名称"  name="custName" lay-verify="required" lay-reqText="请输入客户名称" />
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        所属公司
+                    </label>
+                    <div class="layui-input-inline">
+                        <input  class="layui-input" placeholder="所属公司" name="custCompany"  value="阿里" />
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        客户职位
+                    </label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" placeholder="客户职位" name="custPosition" lay-verify="required" lay-reqText="请输入客户职位"/>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        客户手机号
+                    </label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" placeholder="客户手机号"  name="custPhone" lay-verify="custPhone" lay-reqText="请输入客户手机号"/>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        客户生日
+                    </label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" placeholder="客户生日" name="custBirth" id="date" lay-verify="required" lay-reqText="请输入客户生日" />
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        客户性别
+                    </label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="custSex" value="1" title="男" checked="">
+                        <input type="radio" name="custSex" value="2" title="女">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        客户介绍
+                    </label>
+                    <div class="layui-input-inline">
+                        <textarea class="layui-textarea" placeholder="客户介绍" name="custDesc" ></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">
+                        业务员ID
+                    </label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" placeholder="业务员ID" name="userId" lay-verify="required" lay-reqText="请输入业务员ID"/>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" lay-submit lay-filter="submitFormFilter" id="submitFormBtn"  />
+        </form>
+    </div>
+</script>
+
+<script src="../static/layui/layui.js"> </script>
+<script>
+    layui.use(['table','layer','jquery','form','laydate'], function(){
+        let table = layui.table,
+            layer = layui.layer ,
+            $ = layui.jquery,
+            form = layui.form,
+            laydate = layui.laydate;
+
+        //第一个实例
+        let tab = table.render({
+            elem: '#dataTable'  // 要展示数据的table id值
+            // ,height: 500 // 整体表格高度
+            ,url: '../customer/customer.do?service=list' //后端数据接口
+            ,page: true //开启分页
+            ,limit: 10 //每页条数，不写的话默认为10
+            ,defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                title: '提示'
+                ,layEvent: 'LAYTABLE_TIPS'
+                ,icon: 'layui-icon-tips'
+            }]
+            ,height: 'full-105'
+            ,toolbar: '#headerBtns' //开启头部工具栏，并为其绑定左侧模板
+            ,cols: [[ //表头 field表示Java属性 title 表示列名 sort表示当前列支不支持排序 templet 表示替换表格内容
+                {type:'checkbox', fixed: 'left'} // 开启复选框
+                ,{field: 'id', title: 'ID', sort: true}
+                ,{field: 'custName', title: '客户名称'}
+                ,{field: 'custCompany', title: '客户所属公司'}
+                ,{field: 'custPosition', title: '客户职位'}
+                ,{field: 'custPhone', title: '客户手机号'}
+                ,{field: 'custBirth', title: '客户生日'}
+                ,{field: 'custSex', title: '客户性别',  templet:function (data) { //data 表示当前行的数据
+                        if(data.custSex == 1){
+                            return "男";
+                        }else{
+                            return "女";
+                        }
+                    }}
+                ,{field: 'custDesc', title: '客户介绍'}
+                ,{field: 'userId', title: '业务员ID'}
+                ,{field: 'createTime', title: '创建时间'}
+                ,{field: 'modifyTime', title: '修改时间', sort: true}
+            ]]
+            ,response: {
+                statusCode: 200 //规定成功的状态码，默认：0
+            }
+            ,parseData: function(res){ //res 即为原始返回的数据 resultData
+                // console.log(res)
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.totalCount, //解析数据总长度
+                    "data": res.data.data //解析数据列表
+                };
+            }
+        });
+
+        // 搜索点击事件
+        $("#searchBtn").click(function () {
+            // 重新调用表单实例 (上边定义了方法)
+            let $custName = $("#custName").val();
+            let $custPosition = $("#custPosition").val();
+            let $custCompany = $("#custCompany").val();
+            tab.reload({
+                where:{
+                    custName : $custName ,
+                    custPosition : $custPosition ,
+                    custCompany : $custCompany
+                }
+            })
+        })
+
+        //头工具栏事件
+        table.on('toolbar(dataTableFilter)', function(obj){  // obj = 当前表内容
+            var checkStatus = table.checkStatus(obj.config.id); // checkStatus 表示将获取当前表中被选中的内容
+            let data = checkStatus.data; // 被多选框选中的数据 类型是数组 可用data[0].id获取
+            switch(obj.event){
+                case 'add':
+                    add();
+                    break;
+                case 'getCheckLength':
+                    layer.msg('选中了：'+ data.length + ' 个');
+                    break;
+                case 'del':
+
+                    del(data);
+                    break;
+                //自定义头工具栏右侧图标 - 提示
+                case 'LAYTABLE_TIPS':
+                    layer.alert('这是一个没用的东西，点了也没用');
+                    break;
+            };
+        });
+
+        // 客户添加方法
+        function add() {
+            layer.open({
+                id: "add",
+                type: 1, // 设置为页面层
+                area: ['40%','68%'],
+                title: '新增用户',
+                btnAlign: "c",
+                success: function(){
+                    // 重新渲染弹层中内容
+                    form.render();
+                    //日期
+                    laydate.render({
+                        elem: '#date'
+                    });
+                },
+                content: $("#editForm").html(), // jquery对象，使用html()获取内容，js对象，用innerHTML()获取内容
+                btn: ['提交', '取消'],
+                btn1: function (index) {
+                    $.post("../customer/customer.do?service=add",$("#addForm").serialize(),function (res) {
+                        if (res.code == 200){
+                            layer.msg(res.msg);
+                            // 关闭页面层
+                            layer.close(index);
+                            // 重新加载表单内容
+                            $("#searchBtn").click();
+                        } else {
+                            layer.msg(res.msg);
+                        }
+                    }, "json");
+                }
+            });
+        }
+
+        // 客户删除方法
+        function del(data){
+            layer.confirm('真的删除该行么？', {
+                btn: ['是的','取消'] //按钮
+            }, function(){
+                if (data.length != 0){
+                    var ids = "";
+                    $.each(data,function (index,value) {
+                        // data[index].id 也可以用 alert(value.id) 表示
+                        ids += data[index].id + "&";
+                    })
+                    $.post("../customer/customer.do?service=delete", {"ids":ids}, function (res) {
+                        if (res.code == 200){
+                            layer.msg(res.msg);
+                            // 重新调用表单实例 (上边定义了方法)
+                            // 重新加载表单内容
+                            $("#searchBtn").click();
+                        } else {
+                            layer.msg(res.msg);
+                        }
+                    },"json");
+                } else {
+                    layer.msg("请选择删除内容");
+                }
+            })
+        }
+    });
+</script>
+</body>
+</html>
+</body>
+</html>

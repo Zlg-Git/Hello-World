@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet"   href="../static/layui/css/layui.css" />
+</head>
+<body>
+<div class="layui-container">
+	<!-- 写搜索内容 -->
+	<div>
+		<div class="layui-form layui-form-pane" >
+			<div class="layui-form-item"> 
+				<div class="layui-inline">
+					<label class="layui-form-label">
+						账号
+					</label>
+					<div class="layui-input-inline">
+						<input  class="layui-input" placeholder="用户账号" id="userName"  name="userName"/>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">
+						名称
+					</label>
+					<div class="layui-input-inline">
+						<input  class="layui-input" placeholder="用户名称"  id="realName" />
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">
+						角色
+					</label>
+					<div class="layui-input-inline">
+						<select id="type">
+							<option value="">请选择角色</option>
+							<option value="1">管理员</option>
+							<option value="2">业务员</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<button class="layui-btn" id="searchBtn">搜索</button>		
+				</div>
+			</div>
+				
+		</div>
+	</div>
+	<!-- 显示数据的table -->
+	<div>
+		<table id="dataTable"  lay-filter="dataTableFilter"></table>
+	</div>
+</div>
+<!-- 工具栏模板 -->
+<!-- 头工具栏 -->
+<script type="text/html" id="headerBtns">
+	<button class="layui-btn layui-btn-sm" lay-event="add">新增</button>
+	<button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>
+	<button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="del">删除</button>
+</script>
+<!-- 行工具栏 -->
+<script type="text/html" id="rowBtns">
+	<button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="reset">重置密码</button>
+</script>
+<!-- 新增用户信息模板 -->
+<script type="text/html" id="editForm" style="display:none">
+	<div style="padding-left:100px;padding-top:20px">
+	<form class="layui-form layui-form-pane" id="addForm">
+		<input  type="hidden" name="service" value="add" />
+		<div class="layui-form-item"> 
+			<div class="layui-inline">
+				<label class="layui-form-label">
+					账号
+				</label>
+				<div class="layui-input-inline">
+					<input  class="layui-input" placeholder="用户账号"  name="userName" lay-verify="required" lay-reqText="请输入账号" />
+				</div>
+			</div>
+		</div>
+		<div class="layui-form-item"> 
+			<div class="layui-inline">
+				<label class="layui-form-label">
+					密码
+				</label>
+				<div class="layui-input-inline">
+					<input  class="layui-input" placeholder="密码" name="password"  value="123456" />
+				</div>
+			</div>
+		</div>
+		<div class="layui-form-item"> 
+			<div class="layui-inline">
+				<label class="layui-form-label">
+					姓名
+				</label>
+				<div class="layui-input-inline">
+					<input class="layui-input" placeholder="姓名" name="realName" lay-verify="required" lay-reqText="请输入姓名"/>
+				</div>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<div class="layui-inline">
+				<label class="layui-form-label">
+					角色
+				</label>
+				<div class="layui-input-inline">
+					<select name="type" lay-search>
+						<option value="2">业务员</option>
+						<option value="1">管理员</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<input type="hidden" lay-submit lay-filter="submitFormFilter" id="submitFormBtn"  />
+	</form>
+</div>
+</script>
+
+<script type="text/javascript" src="../static/layui/layui.js"> </script>
+<script type="text/javascript" >
+	layui.use(['table','layer','jquery','form'], function(){
+		let table = layui.table,
+			layer = layui.layer ,
+			$ = layui.jquery,
+			form = layui.form;
+		
+		//第一个实例
+		let tab = table.render({
+			elem: '#dataTable'  // 要展示数据的table id值
+			// ,height: 500 // 整体表格高度
+			,url: '../user/user.do?service=userList' //后端数据接口
+			,page: true //开启分页
+			,limit: 10 //每页条数，不写的话默认为10
+			,defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+				title: '提示'
+				,layEvent: 'LAYTABLE_TIPS'
+				,icon: 'layui-icon-tips'
+			}]
+			,height: 'full-105'
+			,toolbar: '#headerBtns' //开启头部工具栏，并为其绑定左侧模板
+			,cols: [[ //表头 field表示Java属性 title 表示列名 sort表示当前列支不支持排序 templet 表示替换表格内容
+				 {type:'checkbox', fixed: 'left'} // 开启复选框
+				,{field: 'id', title: 'ID', sort: true}
+				,{field: 'userName', title: '用户名'}
+				,{field: 'password', title: '密码', sort: true}
+				,{field: 'realName', title: '真实姓名'}
+				,{field: 'img', title: '头像'}
+				,{field: 'type', title: '类型',  templet:function (data) { //data 表示当前行的数据
+						if(data.type == 1){
+							return "管理员";
+						}else{
+							return "业务员";
+						}
+					}}
+				,{field: 'isDel', title: '启用', templet:function (data) {
+						if(data.isDel == 1){
+							return "有效";
+						}else{
+							return "失效";
+						}
+					}}
+				,{field: 'createTime', title: '创建时间'}
+				,{field: 'modifyTime', title: '修改时间', sort: true}
+				,{fixed: 'right', title:'操作', toolbar: '#rowBtns'}
+			]]
+			,response: {
+				statusCode: 200 //规定成功的状态码，默认：0
+			}
+			,parseData: function(res){ //res 即为原始返回的数据 resultData
+				// console.log(res)
+				return {
+					"code": res.code, //解析接口状态
+					"msg": res.msg, //解析提示文本
+					"count": res.data.totalCount, //解析数据长度
+					"data": res.data.data //解析数据列表
+				};
+			}
+		});
+
+		// 搜索点击事件
+		$("#searchBtn").click(function () {
+			// 重新调用表单实例 (上边定义了方法)
+			let $userName = $("#userName").val();
+			let $realName = $("#realName").val();
+			let $type = $("#type").val();
+			tab.reload({
+				where:{
+					userName : $userName ,
+					realName : $realName ,
+					type : $type
+				}
+			})
+		})
+
+		//头工具栏事件
+		table.on('toolbar(dataTableFilter)', function(obj){  // obj = 当前表内容
+			var checkStatus = table.checkStatus(obj.config.id); // checkStatus 表示将获取当前表中被选中的内容
+			let data = checkStatus.data; // 被多选框选中的数据 类型是数组 可用data[0].id获取
+			switch(obj.event){
+				case 'add':
+					add();
+					break;
+				case 'getCheckLength':
+					layer.msg('选中了：'+ data.length + ' 个');
+					break;
+				case 'del':
+
+					del(data);
+					break;
+				//自定义头工具栏右侧图标 - 提示
+				case 'LAYTABLE_TIPS':
+					layer.alert('这是一个没用的东西，点了也没用');
+					break;
+			};
+		});
+
+		// 用户添加方法
+		function add() {
+			layer.open({
+				id: "add",
+				type: 1, // 设置为页面层
+				area: ['40%','68%'],
+				title: '新增用户',
+				btnAlign: "c",
+				success: function(){
+					// 重新渲染弹层中内容
+					form.render();
+				},
+				content: $("#editForm").html(), // jquery对象，使用html()获取内容，js对象，用innerHTML()获取内容
+				btn: ['提交', '取消'],
+				btn1: function (index) {
+					$.post("../user/user.do?service=add",$("#addForm").serialize(),function (res) {
+						if (res.code == 200){
+							layer.msg(res.msg);
+							// 关闭页面层
+							layer.close(index);
+							// 重新加载表单内容
+							$("#searchBtn").click();
+						} else {
+							layer.msg(res.msg);
+						}
+					}, "json");
+				}
+			});
+		}
+
+		// 用户删除方法
+		function del(data){
+			layer.confirm('真的删除该行么？', {
+				btn: ['是的','取消'] //按钮
+			}, function(){
+				if (data.length != 0){
+					var ids = "";
+					$.each(data,function (index,value) {
+						// data[index].id 也可以用 alert(value.id) 表示
+						ids += data[index].id + "&";
+					})
+					$.post("../user/user.do?service=delete", {"ids":ids}, function (res) {
+						if (res.code == 200){
+							layer.msg(res.msg);
+							// 重新调用表单实例 (上边定义了方法)
+							// 重新加载表单内容
+							$("#searchBtn").click();
+						} else {
+							layer.msg(res.msg);
+						}
+					},"json");
+				} else {
+					layer.msg("请选择删除内容");
+				}
+			}, function(){
+				// layer.msg("取消了");
+			});
+		}
+
+
+		//监听行工具条
+		table.on('tool(dataTableFilter)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+			var data = obj.data; //获得当前行数据
+			// alert(data.id) // 当前行id
+			var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+			if(layEvent == "reset"){ // 判断重置密码
+				//	执行重置密码的方法
+				layer.confirm('确定要重置当前用户的密码吗?', function(index){ // index 当前弹框的下标数
+					$.post("../user/user.do?service=reset",{"id":data.id},function (rs) {
+						let parse = JSON.parse(rs); // 将json字符串转成json对象，或者在 $.post 中设置返回值类型
+						if (parse.code == 200){ // 判断是否修改成功
+							layer.msg(parse.msg)
+							$("#searchBtn").click(); // 重载表格数据
+						} else {
+							layer.msg(parse.msg); //打印错误信息
+						}
+						return false;// 阻止表单名默认提交
+					})
+					layer.close(index); // 关闭弹出层
+				});
+			}
+		});
+
+	});
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>修改密码</title>
+<link rel="stylesheet"   href="../static/layui/css/layui.css" />
+</head>
+<body>
+<div>
+	<form class="layui-form layui-form-pane" >
+		<div class="layui-form-item">
+			<div class="layui-inline">
+				<label class="layui-form-label">原始密码:</label>
+				<div class="layui-input-inline">
+					<input class="layui-input" name="password" placeholder="原始密码" lay-verify="required" lay-reqText="请输入原始密码" />				
+				</div>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<div class="layui-inline">
+				<label class="layui-form-label">新密码:</label>
+				<div class="layui-input-inline">
+					<input class="layui-input" name="newPassword" placeholder="新密码" lay-verify="required" lay-reqText="请输入新密码" />				
+				</div>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<div class="layui-inline">
+				<label class="layui-form-label">确认密码:</label>
+				<div class="layui-input-inline">
+					<input class="layui-input" name="confirmPassword" placeholder="确认密码" lay-verify="required" lay-reqText="请确认密码" />				
+				</div>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<div class="layui-inline layui-col-md-offset1">
+				<button class="layui-btn" lay-submit  lay-filter="submitBtnFilter">确认</button>
+				<button type="reset" class="layui-btn  layui-btn-primary" style="margin-left: 20px">重置</button>
+			</div>
+		</div>
+	</form>
+</div>
+<script type="text/javascript" src="../static/layui/layui.js"> </script>
+<script type="text/javascript" >
+
+	layui.use(['form','layer','jquery'],function () {
+		var form = layui.form
+			,$ = layui.jquery
+			,layer = layui.layer;
+
+		form.on('submit(submitBtnFilter)', function(data){
+			// 将页面数据传送给后端
+			// 进行新密码和确认密码的一致性验证
+			// alert(data.field.password)
+			if (data.field.newPassword  == data.field.confirmPassword){
+			//	向祸端发送旧密码以及新密码
+				$.post("../user/user.do?service=updatePwd",data.field,function (rs) {
+					// 将返回的数据转成 JSON 类型
+					var res = JSON.parse(rs);
+					if (res.code == 200 ){
+						layer.msg(res.msg);
+						setTimeout(function () {
+							//	修改密码成功跳转至登录页面
+							window.parent.location.href = "../login.html"; // 让父页面进行跳转
+						},1000)
+					}else {
+						layer.msg(res.msg);
+					}
+					return false ;
+				})
+			}else { //两次密码不相等
+				layer.msg("两次密码输入不相同，请重新输入")
+				return false ; // 防止提交表单
+			}
+
+			return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+		});
+
+	})
+
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet"   href="../static/layui/css/layui.css" />
+</head>
+<body>
+<img id="userImg" style="width:260px;height:210px;" onerror="javascript:this.src='../static/img/upload.png';"  src=""/><br><br>
+<button id="submitBtn" class="layui-btn" style="width: 200px">确认</button>
+<script type="text/javascript" src="../static/layui/layui.js"></script>
+<script type="text/javascript">
+	layui.use(['upload','layer','jquery'],function(){
+		var upload = layui.upload;
+		var layer = layui.layer;
+		var $ = layui.jquery;
+
+		//加载上传图片
+        upload.render({
+            elem: '#userImg' // 容器标识
+            ,url : "../user/user.do?service=updateImg"
+            // ,data :{"service":"updateImg"}
+            ,accept: "images"  // 设置接收的文件类型
+            ,acceptMime:'image/*'  // 设置打开的文件框中显示的文件类型
+            ,auto : false   // 设置不自动提交
+            ,bindAction:"#submitBtn" // 设置提交按钮
+            ,field : "userImg"  // key-value  userImg-图片byte
+            ,size:0  // 0 无限制  设置上传文件大小
+            ,choose: function(obj){
+            //预读本地文件，如果是多文件，则会遍历。(不支持ie8/9)
+                obj.preview(function(index, file, result) {
+                    $("#userImg").attr("src",result);
+                })
+            }
+            ,done: function(res, index, upload){
+                //获取当前触发上传的元素，一般用于 elem 绑定 class 的情况，注意：此乃 layui 2.1.0 新增
+                // alert(res)
+                if (res.code == 200 ){
+                    window.parent.location.href = "../user/page.do?service=main";
+                }
+            }
+            ,error: function(index, upload){
+                //当上传失败时，你可以生成一个“重新上传”的按钮，点击该按钮时，执行 upload() 方法即可实现重新上传
+                layer.msg("上传失败，请重新选择！");
+            }
+        })
+	});
+</script>
+</body>
+</html>

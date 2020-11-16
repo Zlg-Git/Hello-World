@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="static/js/echarts.js"></script>
+    <script src="static/layui/layui.js"></script>
+<body>
+<div id="main" style="width: 600px;height:400px;margin: auto"></div>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    layui.use(['jquery','layer'],function () {
+        var $ = layui.jquery ,
+            layer = layui.layer ;
+
+        $.post("user/test.do",function (rs) {
+            myChart.setOption({
+                title: {
+                    text: 'ECharts 入门示例'
+                },
+                tooltip: {},
+                legend: {
+                    data: ['销量']
+                },
+                xAxis: {
+                    data: ["业务员", "管理员"]
+                },
+                yAxis: {},
+                series: [{
+                    name: '销量',
+                    type: 'bar',
+                    data: [10, 4]
+                }]
+            });
+        })
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" contentType="text/html;charset=UTF-8">
+<head>
+    <meta charset="UTF-8">
+    <title>用户登录</title>
+    <meta name="description" content="particles.js is a lightweight JavaScript library for creating particles.">
+    <meta name="author" content="Vincent Garreau" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" media="screen" href="static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="static/css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="static/layui/css/layui.css"/>
+</head>
+<body>
+
+<div id="particles-js">
+    <form class="login layui-form">
+        <div class="login-top">
+            登录
+        </div>
+        <div class="login-center clearfix">
+            <input type="hidden" name="service" value="login" />
+            <div class="login-center-img"><img src="static/img/name.png"/></div>
+            <div class="login-center-input">
+                <input type="text" name="userName"  placeholder="用户名" onfocus="this.placeholder=''" onblur="this.placeholder='请输入您的用户名'"/>
+                <div class="login-center-input-text">用户名</div>
+            </div>
+        </div>
+        <div class="login-center clearfix">
+            <div class="login-center-img"><img src="static/img/password.png"/></div>
+            <div class="login-center-input">
+                <input type="password" name="password" placeholder="用户密码" onfocus="this.placeholder=''" onblur="this.placeholder='请输入您的密码'"/>
+                <div class="login-center-input-text">密码</div>
+            </div>
+        </div>
+        <div class="login-center clearfix">
+            <div class="login-center-img"><img src="static/img/password.png"/></div>
+            <div class="login-center-input">
+                <input type="text" name="checkCode" placeholder="验证码"  style="width: 130px"/>
+                <div class="login-center-input-text">验证码</div>
+                <img id="checkCode" alt="验证码" src="checkCode.do" style="width: 70px;margin-left: 20px">
+            </div>
+        </div>
+        <div class="login-button" id="submit" lay-submit lay-filter="loginBtnFilter">
+            登录
+        </div>
+    </form>
+    <div class="sk-rotating-plane"></div>
+</div>
+<div style="text-align:center;">
+</div>
+<!-- scripts -->
+<script src="static/layui/layui.js"></script>
+<script src="static/js/particles.min.js"></script>
+<script src="static/js/app.js"></script>
+<script type="text/javascript">
+
+    layui.use(['form','layer','jquery'],function(){
+        let form = layui.form ,
+            layer = layui.layer ,
+            $ = layui.jquery ;
+
+        //     监听表单提交事件
+        form.on('submit(loginBtnFilter)',function(data){
+            $.post("userLogin.do?service=login",data.field,function(rs){
+                // 判断业务编码(跟JsondData code相关)
+                if(rs.code == 200){
+                    layer.msg("登录成功")
+                    //1秒之后进行页面跳转
+                    setTimeout(function () {
+                        location.href="user/page.do?service=main";
+                    },1000)
+                } else{
+                    layer.msg(rs.msg);
+                }
+                return false; // 防止表单提交
+            },"json");
+            return false;// 阻止表单名默认提交
+        });
+
+        $("#checkCode").click(function () {
+        //    通过这个点击事件，访问后台获取验证码图片 给src属性
+            $(this).prop("src","checkCode.do?"+ new Date());
+        })
+
+        $(document).keypress(function (e) {
+            // 回车键事件 登录
+            if (e.which == 13) {
+                $("#submit").trigger("click");
+            }
+        });
+
+    })
+</script>
+</body>
+</html>

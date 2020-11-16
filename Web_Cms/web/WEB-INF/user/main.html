@@ -1,0 +1,102 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理系统</title>
+    <!-- 导入css文件 -->
+    <link rel="stylesheet" href="/Web_Cms_war/static/layui/css/layui.css">
+    <!-- 导入js文件 -->
+    <script type="text/javascript" src="/Web_Cms_war/static/layui/layui.js" ></script>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">系统后台</div>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+
+                    <img id="userImg" onerror="javascript:this.src='../static/img/head.png';" src="" class="layui-nav-img">
+                    用户
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">基本资料</a></dd>
+                    <dd><a href="">安全设置</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="#" id="loginOut">退了</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree"  lay-filter="test">
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a class="" href="javascript:;">基本信息管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="../user/page.do?service=list" target="content">用户管理</a></dd>
+                        <dd><a href="../customer/list.do" target="content">客户管理</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">系统管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="../user/page.do?service=updatePassword" target="content">修改密码</a></dd>
+                        <dd><a href="../user/page.do?service=updateImg" target="content">修改头像</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">统计分析</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="../dome.html" target="content">年拜访总量</a></dd>
+                        <dd><a href="javascript:;" target="content">月拜访总量</a></dd>
+                        <dd><a href="javascript:;" target="content">区间拜访总量</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px; width: 100%;height: 100%" >
+            <iframe name="content" style="width: 100%;height: 100%;border: 0;" src="https://8zt.cc/"></iframe>
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © layui.com - 底部固定区域
+    </div>
+</div>
+<script src="/Web_Cms_war/static/layui/layui.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use(['element','jquery','layer'], function(){
+        var element = layui.element
+            ,$ = layui.jquery
+            ,layer = layui.layer;
+        // 自动加载头像
+        $(function () {
+            $.post("../user/user.do?service=selectImg",function (rs) {
+                var res = JSON.parse(rs);
+                if (res.code == 200){
+                    // layer.msg(res.data)
+                    $("#userImg").attr("src","/Web_Cms_war"+res.data);
+                }
+            })
+        })
+
+        $("#loginOut").click(function () {
+            $.post("../userLogin.do?service=loginOut",{},function (rs) {
+               if (rs.code == 200){
+                   layer.msg("退出成功");
+                   window.parent.location.href = "../login.html";
+               }
+                return false;// 阻止表单名默认提交
+            },"json");
+        });
+    });
+</script>
+</body>
+</html>

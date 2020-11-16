@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="static/js/echarts.js"></script>
+<script src="static/layui/layui.js"></script>
+<body>
+    <div id="main" style="width: 600px;height:400px;margin: auto"></div>
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+
+        layui.use(['jquery','layer'],function () {
+            var $ = layui.jquery ,
+                layer = layui.layer ;
+
+            // myChart.showLoading(); // 显示加载动画
+            $.post("/user/test.do",{},function (rs) {
+                // myChart.hideLoading(); // 停止加载动画
+                myChart.setOption({
+                    title: {
+                        text: 'ECharts 入门示例'
+                    },
+                    tooltip: {},
+                    legend: {
+                        data: ['销量']
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: function () {
+                            let a = "['"+rs.keys[0]+"'";
+                            for (let i = 1; i < rs.keys.size; i++) {
+                                a += ",'"+rs.keys[i]+"'";
+                            }
+                            a += "]";
+                            return a;
+                        }
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        name: '销量',
+                        type: 'bar',
+                        data: function () {
+                            let a = "['"+rs.values[0]+"'";
+                            for (let i = 1; i < rs.values.size; i++) {
+                                a += ",'"+rs.values[i]+"'";
+                            }
+                            a += "]";
+                            return a;
+                        }
+                    }]
+                });
+            })
+
+
+            /*var $ = layui.jquery ,
+                layer = layui.layer ;
+            // 指定图表的配置项和数据
+            var option = {
+                xAxis: {
+                    type: 'category',
+                    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    data: [120, 200, 150, 80, 70, 110, 130],
+                    type: 'bar',
+                    showBackground: true,
+                    backgroundStyle: {
+                        color: 'rgba(220, 220, 220, 0.8)'
+                    }
+                }]
+            }
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);*/
+        })
+    </script>
+</body>
+</html>
